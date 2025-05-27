@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Questao-01</title>
+  <style>
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #e9ecef;
+        color: #495057;
+    }
+    .main {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    header {
+      background-color: #343a40;
+      color: #fff;
+      text-align: center;
+      padding: 30px 15px;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .layout {
+      display: flex;
+      flex-direction: row;
+      min-height: 400px;
+    }
+    nav {
+      flex: 0 0 25%;
+      background-color: #f8f9fa;
+      border-right: 1px solid #dee2e6;
+      padding: 25px;
+      box-sizing: border-box;
+    }
+    nav h2 {
+      margin-top: 0;
+      color: #343a40;
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #343a40;
+      padding-bottom: 10px;
+    }
+    nav ul {
+      list-style: none;
+      padding: 0;
+    }
+    nav li {
+      margin-bottom: 12px;
+    }
+    nav a {
+      color: #007bff;
+      text-decoration: none;
+      display: block;
+      padding: 8px;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    nav a:hover {
+        background-color: #007bff1a;
+    }
+    article {
+        flex: 1;
+        background-color: #fff;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    article h2 {
+        color: #343a40;
+        font-size: 1.8em;
+        margin-top: 0;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #343a40;
+        padding-bottom: 15px;
+    }
+    .fake-img {
+        background-color: #ced4da;
+        color: #495057;
+        text-align: center;
+        padding: 40px 20px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        font-style: italic;
+    }
+    footer {
+        background-color: #343a40;
+        color: #fff;
+        text-align: center;
+        padding: 25px;
+        font-size: 0.9em;
+    }
+    footer a {
+        color: #00bcd4;
+        text-decoration: none;
+    }
+    footer a:hover {
+        text-decoration: underline;
+    }
+    @media screen and (max-width: 768px) {
+        .layout {
+            flex-direction: column;
+        }
+
+        nav {
+            flex: 0 0 auto;
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid #dee2e6;
+        }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>Bem-vindo ao Meu Website</header>
+    <section class="layout">
+      <nav>
+        <h2>Navegação</h2>
+        <ul>
+          <li><a href="#">Página Inicial</a></li>
+          <li><a href="#">Sobre</a></li>
+          <li><a href="#">Serviços</a></li>
+          <li><a href="#">Contatos</a></li>
+          <li><a href="#">Galeria</a></li>
+        </ul>
+      </nav>
+      <article>
+        <h2>Principal</h2>
+        <p>Esta é a seção principal do nosso website.</p>
+        <div class="fake-img">Imagem em Destaque</div>
+        <p>Mais conteúdo relevante sobre o tema principal.</p>
+        <div class="fake-img">Outra Imagem</div>
+        <p>Um breve resumo ou informação adicional.</p>
+        <div class="fake-img">Imagem Ilustrativa</div>
+      </article>
+    </section>
+    <footer>
+      <p>&copy;Todos os direitos reservados.</p>
+      <p>contato: <a href="mailto:contato@meuwebsite.com">marcosvitorsouzafreire@gmail.com</a></p>
+      <p>Localização: Quixadá, Ceará, Brasil</p>
+    </footer>
+  </main>
+</body>
+</html>
