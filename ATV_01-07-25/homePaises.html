@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório COVID-19 Dinâmico - Países com Análise</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: #fff; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px;}
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #e9ecef; }
+        .destaque-br { background-color: #d4edda; font-weight: bold; }
+        .rodape { margin-top: 25px; padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; }
+        .loading, .error { text-align: center; font-size: 1.2em; padding: 20px; color: #777; }
+        h1, h2 { color: #343a40; border-bottom: 2px solid #28a745; padding-bottom: 10px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Relatório COVID-19 por País</h1>
+        
+        <div id="loading-message" class="loading">
+            <p>Buscando dados da API... Por favor, aguarde.</p>
+        </div>
+
+        <div id="error-message" class="error" style="display:none;">
+            <p><strong>Erro:</strong> Não foi possível carregar os dados da API. Tente recarregar a página.</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome do País</th>
+                    <th>Número de Casos</th>
+                    <th>Número de Falecimentos</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-paises">
+                </tbody>
+        </table>
+
+        <div id="rodape-analise" class="rodape" style="display:none;">
+            <h2>Médias Globais</h2>
+            <p id="media-casos"></p>
+            <p id="media-falecimentos"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiUrl = "https://covid19-brazil-api.now.sh/api/report/v1/countries";
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro de rede: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    processarDados(data.data);
+                    console.log(data.data)
+                })
+                .catch(error => {
+                    console.error("Falha na busca de dados:", error);
+                    document.getElementById('loading-message').style.display = 'none';
+                    document.getElementById('error-message').style.display = 'block';
+                });
+        });
+
+        function processarDados(dados) {
+            
+            document.getElementById('loading-message').style.display = 'none';
+          
+            const numPaises = dados.length;
+            const mediaCasos = dados.reduce((sum, pais) => sum + (pais.cases || 0), 0) / numPaises;
+            const mediaFalecimentos = dados.reduce((sum, pais) => sum + (pais.deaths || 0), 0) / numPaises;
+            
+            
+            const tbody = document.getElementById('tabela-paises');
+            dados.forEach(pais => {
+                const tr = document.createElement('tr'); 
+                if (pais.country === 'Brazil') {
+                    tr.classList.add('destaque-br');
+                }
+
+                tr.innerHTML = `
+                    <td>${pais.country}</td>
+                    <td>${(pais.cases || 0).toLocaleString('pt-BR')}</td>
+                    <td>${(pais.deaths || 0).toLocaleString('pt-BR')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+
+            document.getElementById('media-casos').innerHTML = `<b>Média de Casos por País:</b> ${mediaCasos.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`;
+            document.getElementById('media-falecimentos').innerHTML = `<b>Média de Falecimentos por País:</b> ${mediaFalecimentos.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`;
+            
+            document.getElementById('rodape-analise').style.display = 'block';
+            
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório COVID - Estados do Brasil</title>
+    <style>
+        body { font-family: sans-serif; margin: 2em; background-color: #f4f4f9; color: #333; }
+        .container { max-width: 1000px; margin: auto; background: #fff; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px;}
+        th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #e9ecef; }
+        .destaque { background-color: #fff3cd; font-weight: bold; }
+        .rodape { margin-top: 25px; padding: 20px; background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; }
+        .loading, .error { text-align: center; font-size: 1.2em; padding: 20px; color: #777; }
+        h1, h2 { color: #343a40; border-bottom: 2px solid #007bff; padding-bottom: 10px;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Relatório COVID-19 por Estado do Brasil</h1>
+        
+        <div id="loading-message" class="loading">
+            <p>Buscando dados da API... por favor, aguarde.</p>
+        </div>
+
+        <div id="error-message" class="error" style="display:none;">
+            <p><strong>Erro:</strong> Não foi possível carregar os dados da api</p>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Nome do Estado</th>
+                    <th>Abreviação</th>
+                    <th>Número de Casos</th>
+                    <th>Número de Suspeitos</th>
+                    <th>Número de Falecimentos</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-estados">
+                </tbody>
+        </table>
+
+        <div id="rodape-analise" class="rodape" style="display:none;">
+            <h2>Análise dos Dados</h2>
+            <p id="media-casos"></p>
+            <p id="media-suspeitos"></p>
+            <p id="media-falecimentos"></p>
+            <hr>
+            <p id="maior-relacao"></p>
+            <p id="menor-relacao"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiUrl = "https://covid19-brazil-api.now.sh/api/report/v1";
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro de rede: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const dadosEstados = data.data;
+                    processaDados(dadosEstados); 
+                })
+                .catch(error => {
+                    console.error("Falha na busca de dados:", error);
+                    document.getElementById('loading-message').style.display = 'none';
+                    document.getElementById('error-message').style.display = 'block';
+                });
+        });
+
+        function processaDados(dados) {
+            document.getElementById('loading-message').style.display = 'none';
+
+            const numEstados = dados.length;
+            const mediaCasos = dados.reduce((sum, e) => sum + e.cases, 0) / numEstados;
+            const mediaSuspeitos = dados.reduce((sum, e) => sum + e.suspects, 0) / numEstados;
+            const mediaFalecimentos = dados.reduce((sum, e) => sum + e.deaths, 0) / numEstados;
+
+            let maiorRelacao = { nome: '', valor: -1 };
+            let menorRelacao = { nome: '', valor: Infinity };
+
+            dados.forEach(estado => {
+                if (estado.deaths > 0) {
+                    const relacao = estado.cases / estado.deaths;
+                    if (relacao > maiorRelacao.valor) {
+                        maiorRelacao = { nome: estado.state, valor: relacao };
+                    }
+                    if (relacao < menorRelacao.valor) {
+                        menorRelacao = { nome: estado.state, valor: relacao };
+                    }
+                }
+            });
+
+            const tbody = document.getElementById('tabela-estados');
+            dados.forEach(estado => {
+                const tr = document.createElement('tr');
+                if (estado.deaths > mediaFalecimentos) {
+                    tr.classList.add('destaque');
+                }
+                tr.innerHTML = `
+                    <td>${estado.state}</td>
+                    <td>${estado.uf}</td>
+                    <td>${estado.cases.toLocaleString('pt-BR')}</td>
+                    <td>${estado.suspects.toLocaleString('pt-BR')}</td>
+                    <td>${estado.deaths.toLocaleString('pt-BR')}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            
+            document.getElementById('media-casos').innerHTML = `<b>Média do Número de Casos:</b> ${mediaCasos.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`;
+            document.getElementById('media-suspeitos').innerHTML = `<b>Média do Número de Suspeitos:</b> ${mediaSuspeitos.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`;
+            document.getElementById('media-falecimentos').innerHTML = `<b>Média do Número de Falecimentos:</b> ${mediaFalecimentos.toLocaleString('pt-BR', {maximumFractionDigits: 0})}`;
+            
+            document.getElementById('maior-relacao').innerHTML = `<b>Maior Relação Casos/Falecimentos:</b> ${maiorRelacao.nome} (${maiorRelacao.valor.toFixed(2)})`;
+            document.getElementById('menor-relacao').innerHTML = `<b>Menor Relação Casos/Falecimentos:</b> ${menorRelacao.nome} (${menorRelacao.valor.toFixed(2)})`;
+
+            
+            document.getElementById('rodape-analise').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
