@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio Digital - API</title>
+    <style>
+        /* Estilo Geral */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        /* Cabeçalho */
+        header {
+            text-align: center;
+            border-bottom: 1px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #bb86fc;
+            margin: 0;
+        }
+
+        /* Cartões de Informação */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #03dac6;
+        }
+
+        .card .value {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        /* Tabela de Produtos */
+        .table-container {
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        th {
+            background-color: #333;
+            color: #bb86fc;
+        }
+
+        tbody tr:hover {
+            background-color: #2a2a2a;
+        }
+
+        /* Estilos de Destaque para a Tabela */
+        .mais-caro {
+            background-color: #03dac6; /* Verde */
+            color: #121212;
+            font-weight: bold;
+        }
+
+        .mais-barato {
+            background-color: #cf6679; /* Vermelho */
+            color: #121212;
+            font-weight: bold;
+        }
+
+        .acima-media {
+            background-color: #3700b3; /* Roxo */
+        }
+        
+        .mais-caro:hover, .mais-barato:hover, .acima-media:hover {
+            background-color: #444;
+        }
+
+
+        /* Efeito de Carregando (Spinner) */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #03dac6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cardápio Digital</h1>
+            <p>Informações consumidas da nossa API local</p>
+        </header>
+
+        <main>
+            <section class="info-cards">
+                <div class="card" id="card-maior-preco">
+                    <h3>Produto Mais Caro</h3>
+                    <div class="spinner"></div>
+                    <p class="value" style="display: none;"></p>
+                    <small class="description" style="display: none;"></small>
+                </div>
+                <div class="card" id="card-menor-preco">
+                    <h3>Produto Mais Barato</h3>
+                    <div class="spinner"></div>
+                    <p class="value" style="display: none;"></p>
+                    <small class="description" style="display: none;"></small>
+                </div>
+                <div class="card" id="card-media">
+                    <h3>Média de Preços</h3>
+                    <div class="spinner"></div>
+                    <p class="value" style="display: none;"></p>
+                </div>
+            </section>
+
+            <section class="table-container">
+                <h2>Todos os Produtos</h2>
+                <table id="tabela-produtos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Tipo</th>
+                            <th>Preço</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpo-tabela">
+                        </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <script>
+       
+        const formatarMoeda = (valor) => {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        };
+
+       
+        function exibirProdutos(produtos, maiorProduto, menorProduto, media) {
+            const corpoTabela = document.getElementById('corpo-tabela');
+            corpoTabela.innerHTML = ''; 
+
+            produtos.forEach(produto => {
+                const linha = document.createElement('tr');
+                
+                
+                if (produto.id === maiorProduto.id) {
+                    linha.classList.add('mais-caro');
+                } else if (produto.id === menorProduto.id) {
+                    linha.classList.add('mais-barato');
+                } else if (produto.preco > media) {
+                    linha.classList.add('acima-media');
+                }
+
+                linha.innerHTML = `
+                    <td>${produto.id}</td>
+                    <td>${produto.nome}</td>
+                    <td>${produto.tipo}</td>
+                    <td>${formatarMoeda(produto.preco)}</td>
+                `;
+                corpoTabela.appendChild(linha);
+            });
+        }
+
+        
+        function exibirMaiorPreco(produto) {
+            const card = document.getElementById('card-maior-preco');
+            card.querySelector('.spinner').style.display = 'none';
+            card.querySelector('.value').textContent = formatarMoeda(produto.preco);
+            card.querySelector('.description').textContent = produto.nome;
+            card.querySelector('.value').style.display = 'block';
+            card.querySelector('.description').style.display = 'block';
+        }
+        
+       
+        function exibirMenorPreco(produto) {
+            const card = document.getElementById('card-menor-preco');
+            card.querySelector('.spinner').style.display = 'none';
+            card.querySelector('.value').textContent = formatarMoeda(produto.preco);
+            card.querySelector('.description').textContent = produto.nome;
+            card.querySelector('.value').style.display = 'block';
+            card.querySelector('.description').style.display = 'block';
+        }
+
+       
+        function exibirMedia(infoMedia) {
+            const card = document.getElementById('card-media');
+            card.querySelector('.spinner').style.display = 'none';
+            card.querySelector('.value').textContent = formatarMoeda(infoMedia.media_dos_precos);
+            card.querySelector('.value').style.display = 'block';
+        }
+        
+       
+        async function carregarDadosDaAPI() {
+            const baseURL = 'http://localhost:3000';
+            const urls = [
+                `${baseURL}/produtos`,
+                `${baseURL}/maior`,
+                `${baseURL}/menor`, 
+                `${baseURL}/media`
+            ];
+
+            try {
+               
+                const respostas = await Promise.all(urls.map(url => fetch(url)));
+
+                
+                for (const resposta of respostas) {
+                    if (!resposta.ok) {
+                        throw new Error(`Falha na API: ${resposta.statusText}`);
+                    }
+                }
+
+                
+                const [produtos, maiorProduto, menorProduto, infoMedia] = await Promise.all(respostas.map(r => r.json()));
+
+                
+                exibirMaiorPreco(maiorProduto);
+                exibirMenorPreco(menorProduto);
+                exibirMedia(infoMedia);
+                exibirProdutos(produtos, maiorProduto, menorProduto, infoMedia.media_dos_precos);
+
+            } catch (error) {
+                console.error("Erro ao carregar dados da API:", error);
+                document.body.innerHTML = `<h1>Erro ao conectar com a API. Verifique se o servidor está rodando.</h1><p>${error.message}</p>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', carregarDadosDaAPI);
+    </script>
+</body>
+</html>

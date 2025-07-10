@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Pior Jogo da Memória Possível</title>
+    <style>
+       
+        body { background-color: #DDDDDD; font-family: 'Comic Sans MS', cursive, sans-serif; text-align: center; }
+        h1 { color: #0000FF; }
+        table { margin-left: auto; margin-right: auto; border-collapse: collapse; border: 2px solid black; }
+        td {
+            width: 70px;
+            height: 70px;
+            border: 1px solid black;
+            text-align: center;
+            font-size: 40px;
+            cursor: pointer;
+            background-color: #A0A0A0;
+            color: black; 
+        }
+       
+        .virada {
+            background-color: #FFFF00;
+        }
+        
+        .combinada {
+            background-color: #00FF00; 
+            cursor: default;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>JOGO DA MEMÓRIA 2000</h1>
+
+    <table id="tabuleiro">
+        </table>
+
+    <p>Pontos: <span id="pontos">0</span></p>
+    <p>Para jogar de novo, atualize a página (F5).</p>
+
+    <script>
+        
+        var emojis = ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'];
+        var primeiraCarta = null;
+        var travarCliques = false;
+        var pontos = 0;
+        var paresEncontrados = 0;
+
+        
+        function criarTabuleiro() {
+            var tabuleiro = document.getElementById('tabuleiro');
+            var cartasEmbaralhadas = [...emojis, ...emojis].sort(() => Math.random() - 0.5);
+
+            var conteudoTabela = '';
+            for (var i = 0; i < 4; i++) {
+                conteudoTabela += '<tr>';
+                for (var j = 0; j < 4; j++) {
+                    var emoji = cartasEmbaralhadas.pop();
+                    
+                    conteudoTabela += `<td data-emoji="${emoji}" onclick="virarCarta(this)">?</td>`;
+                }
+                conteudoTabela += '</tr>';
+            }
+            tabuleiro.innerHTML = conteudoTabela;
+        }
+
+       
+        function virarCarta(carta) {
+            if (travarCliques || carta.classList.contains('combinada') || carta === primeiraCarta) {
+                return;
+            }
+            
+           
+            carta.innerHTML = carta.dataset.emoji;
+            carta.classList.add('virada');
+
+            if (primeiraCarta === null) {
+                primeiraCarta = carta;
+            } else {
+                travarCliques = true;
+
+                if (primeiraCarta.dataset.emoji === carta.dataset.emoji) {
+                    
+                    pontos++;
+                    paresEncontrados++;
+                    document.getElementById('pontos').textContent = pontos;
+
+                    primeiraCarta.classList.add('combinada');
+                    carta.classList.add('combinada');
+                    
+                    primeiraCarta = null;
+                    travarCliques = false;
+                    
+                    if(paresEncontrados === 8) {
+                        alert("Você ganhou! Incrível.");
+                    }
+                } else {
+                   
+                    setTimeout(function() {
+                        
+                        primeiraCarta.innerHTML = '?';
+                        carta.innerHTML = '?';
+
+                        primeiraCarta.classList.remove('virada');
+                        carta.classList.remove('virada');
+                        
+                        primeiraCarta = null;
+                        travarCliques = false;
+                    }, 800); 
+                }
+            }
+        }
+
+       
+        criarTabuleiro();
+    </script>
+
+</body>
+</html>
